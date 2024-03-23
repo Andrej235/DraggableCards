@@ -1,25 +1,17 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import Card from "./Components/Card/Card";
+import CardContainer from "./Components/CardContainer/CardContainer";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <CardContainer>
+      <Card>Lorem ipsum dolor sit amet.</Card>
+      <Card>Corrupti nisi dolore debitis veniam?</Card>
+      <Card>Voluptatibus adipisci a repudiandae maiores!</Card>
+      <Card>Architecto cum harum culpa doloremque.</Card>
+      <Card>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Error, fugit.
+      </Card>
+    </CardContainer>
   );
 }
 
