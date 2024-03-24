@@ -1,35 +1,49 @@
-import React, { Component, useCallback, useRef } from "react";
+import React from "react";
 import "./Card.scss";
 import gsap from "gsap";
 import Observer from "gsap/Observer";
-import useMousePosition from "../../UseMousePosition";
 import { CSSRulePlugin } from "gsap/all";
 
 type CardProps = {
   children: string;
+  onDragStart?: () => void;
+  onDragEnd?: () => void;
+  onMouseOver?: () => void;
 };
 
-export default function Card({ children }: CardProps) {
-  gsap.registerPlugin(Observer);
-  gsap.registerPlugin(CSSRulePlugin);
+type CardState = {};
 
-  const cardRef = useCallback((node: HTMLDivElement) => {
+class Card extends React.Component<CardProps, CardState> {
+  observer: Observer | null = null;
+
+  constructor(props: CardProps) {
+    super(props);
+    this.state = {};
+  }
+
+  componentDidMount() {
+    gsap.registerPlugin(Observer);
+    gsap.registerPlugin(CSSRulePlugin);
+
     const rule = CSSRulePlugin.getRule(".card.dragging:after");
-    //Maybe use a state to check if dragging is possible? So that when onDragEnd starts the state gets set to false when onDragEnd animation finished it gets set to true
 
-    Observer.create({
-      target: node,
+    this.observer = Observer.create({
+      target: this.ref.current,
       type: "touch,pointer",
       onDragStart: () => {
-        node.classList.add("dragging");
+        this.ref.current?.classList.add("dragging");
+        this.props.onDragStart?.();
       },
       onDragEnd: () => {
         gsap.to(rule, {
           cssRule: {
             y: 0,
           },
-          duration: 0.5,
-          onComplete: () => node.classList.remove("dragging"),
+          duration: 0.15,
+          onComplete: () => {
+            this.props.onDragEnd?.();
+            this.ref.current?.classList.remove("dragging");
+          },
         });
       },
       onDrag: (x) => {
@@ -41,11 +55,21 @@ export default function Card({ children }: CardProps) {
         });
       },
     });
-  }, []);
+  }
 
-  return (
-    <div className="card" ref={cardRef}>
-      {children}
-    </div>
-  );
+  componentWillUnmount() {
+    this.observer?.kill();
+  }
+
+  ref = React.createRef<HTMLDivElement>();
+
+  render() {
+    return (
+      <div className="card" ref={this.ref} onMouseOver={this.props.onMouseOver}>
+        {this.props.children}
+      </div>
+    );
+  }
 }
+
+export default Card;
