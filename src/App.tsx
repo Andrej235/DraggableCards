@@ -74,35 +74,30 @@ function App() {
     cardsCopy[from] = temp;
 
     setCards({
-      // items: reorderArray(cards.items, from, to),
-      items: cardsCopy,
+      items: reorderArray(cards.items, from, to),
       state: state,
       changedId: temp.props.id,
     });
+  }
 
-    //TODO: test this function with more 'normal' / basic inputs, ex: letters or numbers. It seems to duplicate some elements
-    function reorderArray<T>(array: T[], from: number, to: number) {
-      const newArray = [];
-      if (from < to) {
-        // Move elements from 'from' to 'to' in the original array
-        newArray.push(...array.slice(0, from));
-        console.log(newArray.length);
-        newArray.push(...array.slice(from, to + 1));
-        console.log(newArray.length);
-        newArray.push(array[from]);
-        console.log(newArray.length);
-        newArray.push(...array.slice(to + 1));
-        console.log(newArray.length);
-      } else {
-        // Move elements from 'to' to 'from' in the original array
-        newArray.push(...array.slice(0, to));
-        newArray.push(array[from]);
-        newArray.push(...array.slice(from, to));
-        newArray.push(...array.slice(to));
-      }
-
-      return newArray;
+  //TODO: test this function with more 'normal' / basic inputs, ex: letters or numbers. It seems to duplicate some elements
+  function reorderArray<T>(array: T[], from: number, to: number) {
+    const newArray = [];
+    if (from < to) {
+      // Move elements from 'from' to 'to' in the original array
+      newArray.push(...array.slice(0, from));
+      newArray.push(...array.slice(from + 1, to + 1));
+      newArray.push(array[from]);
+      newArray.push(...array.slice(to + 1));
+    } else {
+      // Move elements from 'to' to 'from' in the original array
+      newArray.push(...array.slice(0, to));
+      newArray.push(array[from]);
+      newArray.push(...array.slice(to, from));
+      newArray.push(...array.slice(from + 1));
     }
+
+    return newArray;
   }
 
   return (
@@ -111,14 +106,10 @@ function App() {
 
       <button
         onClick={() => {
-          setCards({
-            state: Flip.getState(".card"),
-            items: gsap.utils.shuffle(cards.items),
-            changedId: null,
-          });
+          console.log(reorderArray(["a", "b", "c", "d", "e"], 3, 1));
         }}
       >
-        Shuffle
+        Change
       </button>
     </>
   );
