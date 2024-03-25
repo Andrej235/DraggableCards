@@ -19,6 +19,7 @@ export default function CardContainer({
         .filter((x) => x.type === Card)
         .map((x, i) => (
           <Card
+            id={x.props.id}
             key={x.key}
             onDragStart={() => {
               SetdraggingCardId(i);
