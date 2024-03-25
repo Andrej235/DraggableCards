@@ -39,8 +39,6 @@ export default function CardContainer({
               children[i] = temp; */
               onReorder(draggingCardId, i);
               SetdraggingCardId(i);
-
-              console.log("Mouse over " + i);
             }}
           >
             {x.props.children}
