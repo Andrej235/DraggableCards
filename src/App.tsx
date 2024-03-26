@@ -10,7 +10,7 @@ function App() {
   const [cards, setCards] = useState<{
     items: JSX.Element[];
     state: Flip.FlipState | null;
-    changedId: string | null;
+    changedIds: string[] | null;
   }>({
     items: [
       <Card key={1} id="card-1">
@@ -30,22 +30,20 @@ function App() {
       </Card>,
     ],
     state: null,
-    changedId: null,
+    changedIds: null,
   });
 
   useGSAP(
     () => {
-      if (!cards.state) return;
+      if (!cards.state || !cards.changedIds) return;
 
       Flip.from(cards.state, {
-        targets: cards.changedId ? `#${cards.changedId}` : ".card",
+        targets: cards.changedIds,
         absolute: false,
         ease: "power1.inOut",
         simple: true,
         duration: 0.33,
       });
-
-      // This has to be done with .to instead of .from because from will always have a state for all cards
     },
     {
       dependencies: [cards],
@@ -53,64 +51,64 @@ function App() {
   );
 
   function onReorder(from: number, to: number) {
-    let cardsCopy = cards.items.slice();
-
-    let state: Flip.FlipState;
-
-    if (from < to) {
-      state = Flip.getState("#" + cards.items[from].props.id);
-      for (let i = from + 1; i <= to; i++) {
-        state.add(Flip.getState("#" + cards.items[i].props.id));
-      }
-    } else {
-      state = Flip.getState("#" + cards.items[to].props.id);
-      for (let i = to + 1; i <= from; i++) {
-        state.add(Flip.getState("#" + cards.items[i].props.id));
-      }
-    }
-
-    const temp = cardsCopy[to];
-    cardsCopy[to] = cardsCopy[from];
-    cardsCopy[from] = temp;
+    const newArray = reorderArray(cards.items, from, to);
 
     setCards({
-      items: reorderArray(cards.items, from, to),
-      state: state,
-      changedId: temp.props.id,
+      items: newArray.array,
+      state: Flip.getState(newArray.changedIds),
+      changedIds: newArray.changedIds,
+      // changedIds: ["#" + cards.items[to].props.id],
     });
   }
 
-  //TODO: test this function with more 'normal' / basic inputs, ex: letters or numbers. It seems to duplicate some elements
-  function reorderArray<T>(array: T[], from: number, to: number) {
-    const newArray = [];
+  function reorderArray<T extends React.JSX.Element>(
+    array: T[],
+    from: number,
+    to: number
+  ): {
+    array: T[];
+    changedIds: string[];
+  } {
+    const newArray: T[] = [];
+    const changedIds: string[] = [];
+
     if (from < to) {
       // Move elements from 'from' to 'to' in the original array
       newArray.push(...array.slice(0, from));
       newArray.push(...array.slice(from + 1, to + 1));
       newArray.push(array[from]);
       newArray.push(...array.slice(to + 1));
+
+      changedIds.push(
+        ...array.slice(from + 1, to + 1).map((x) => `#${x.props.id}`)
+      );
     } else {
       // Move elements from 'to' to 'from' in the original array
       newArray.push(...array.slice(0, to));
       newArray.push(array[from]);
       newArray.push(...array.slice(to, from));
       newArray.push(...array.slice(from + 1));
+
+      changedIds.push(...array.slice(to, from).map((x) => `#${x.props.id}`));
     }
 
-    return newArray;
+    return {
+      array: newArray,
+      changedIds: changedIds,
+    };
   }
 
   return (
     <>
       <CardContainer onReorder={onReorder}>{cards.items}</CardContainer>
 
-      <button
+      {/*       <button
         onClick={() => {
           console.log(reorderArray(["a", "b", "c", "d", "e"], 3, 1));
         }}
       >
         Change
-      </button>
+      </button> */}
     </>
   );
 }

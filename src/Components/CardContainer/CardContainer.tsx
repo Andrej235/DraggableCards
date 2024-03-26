@@ -32,11 +32,6 @@ export default function CardContainer({
 
               if (draggingCardId === i) return;
 
-              //TODO Reorder children so that i and draggingCardId swap places
-
-              /*               const temp = children[draggingCardId];
-              children[draggingCardId] = children[i];
-              children[i] = temp; */
               onReorder(draggingCardId, i);
               SetdraggingCardId(i);
             }}
