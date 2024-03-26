@@ -16,5 +16,9 @@
 
   &:has(.card.dragging) {
     cursor: grabbing;
+
+    & .card {
+      cursor: grabbing;
+    }
   }
 }

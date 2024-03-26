@@ -14,25 +14,4 @@
 
   border-radius: 10px;
   cursor: grab;
-
-  &:has(~ .card.dragging) {
-    cursor: grabbing;
-  }
-
-  &.dragging {
-    cursor: grabbing;
-
-/*     &::after {
-      content: "";
-      display: block;
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: $primary-500;
-      z-index: 1;
-      pointer-events: none;
-    } */
-  }
 }

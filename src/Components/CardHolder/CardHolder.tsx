@@ -1,16 +1,16 @@
 import React, { useState } from "react";
-import "./CardContainer.scss";
+import "./CardHolder.scss";
 import Card from "../Card/Card";
 
-type CardContainerProps = {
+type CardHolderProps = {
   children: React.JSX.Element[];
   onReorder: (from: number, to: number) => void;
 };
 
-export default function CardContainer({
+export default function CardHolder({
   children,
   onReorder,
-}: CardContainerProps) {
+}: CardHolderProps) {
   const [draggingCardId, SetdraggingCardId] = useState<number>(-1);
 
   return (
