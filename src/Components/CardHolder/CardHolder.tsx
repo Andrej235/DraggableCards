@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./CardHolder.scss";
-import Card from "../Card/Card";
+import CardDisplay from "../CardDisplay/CardDisplay";
 
 type CardHolderProps = {
   children: React.JSX.Element[];
@@ -16,9 +16,9 @@ export default function CardHolder({
   return (
     <div className="card-container">
       {children
-        .filter((x) => x.type === Card)
+        .filter((x) => x.type === CardDisplay)
         .map((x, i) => (
-          <Card
+          <CardDisplay
             id={x.props.id}
             key={x.key}
             onDragStart={() => {
@@ -37,7 +37,7 @@ export default function CardHolder({
             }}
           >
             {x.props.children}
-          </Card>
+          </CardDisplay>
         ))}
     </div>
   );

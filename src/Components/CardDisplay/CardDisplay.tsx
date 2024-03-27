@@ -1,9 +1,9 @@
 import React from "react";
-import "./Card.scss";
+import "./CardDisplay.scss";
 import gsap from "gsap";
 import Observer from "gsap/Observer";
 
-type CardProps = {
+type CardDisplayProps = {
   children: string;
   id: string;
   onDragStart?: () => void;
@@ -13,10 +13,10 @@ type CardProps = {
 
 type CardState = {};
 
-class Card extends React.Component<CardProps, CardState> {
+class CardDisplay extends React.Component<CardDisplayProps, CardState> {
   observer: Observer | null = null;
 
-  constructor(props: CardProps) {
+  constructor(props: CardDisplayProps) {
     super(props);
     this.state = {};
   }
@@ -68,4 +68,4 @@ class Card extends React.Component<CardProps, CardState> {
   }
 }
 
-export default Card;
+export default CardDisplay;
