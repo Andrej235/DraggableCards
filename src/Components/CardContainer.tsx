@@ -1,19 +1,19 @@
 import { useGSAP } from "@gsap/react";
-import React from "react";
 import CardHolder from "./CardHolder/CardHolder";
 import gsap from "gsap";
 import Flip from "gsap/Flip";
+import Card from "./Card";
 gsap.registerPlugin(Flip);
 
 export type CardsProps = {
-  items: JSX.Element[];
+  items: Card[];
   state: Flip.FlipState | null;
   changedIds: string[] | null;
 };
 
 type CardContainerProps = {
   cards: CardsProps;
-  onReorder: (cards: CardsProps) => void; //? Should update props in the parent
+  onReorder: (cards: CardsProps) => void; //? Callback function should update props in the parent (specifically cards)
 };
 
 export default function CardContainer({
@@ -45,7 +45,7 @@ export default function CardContainer({
     });
   }
 
-  function reorderArray<T extends React.JSX.Element>(
+  function reorderArray<T extends Card>(
     array: T[],
     from: number,
     to: number
@@ -64,7 +64,7 @@ export default function CardContainer({
       newArray.push(...array.slice(to + 1));
 
       changedIds.push(
-        ...array.slice(from + 1, to + 1).map((x) => `#${x.props.id}`)
+        ...array.slice(from + 1, to + 1).map((x) => `#card-${x.id}`)
       );
     } else {
       // Move elements from 'to' to 'from' in the original array
@@ -73,7 +73,7 @@ export default function CardContainer({
       newArray.push(...array.slice(to, from));
       newArray.push(...array.slice(from + 1));
 
-      changedIds.push(...array.slice(to, from).map((x) => `#${x.props.id}`));
+      changedIds.push(...array.slice(to, from).map((x) => `#card-${x.id}`));
     }
 
     return {
@@ -82,5 +82,5 @@ export default function CardContainer({
     };
   }
 
-  return <CardHolder onReorder={reorder}>{items}</CardHolder>;
+  return <CardHolder cards={items} onReorder={reorder} />;
 }
