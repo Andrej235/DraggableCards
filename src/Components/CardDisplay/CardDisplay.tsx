@@ -9,6 +9,10 @@ type CardDisplayProps = {
   onDragStart?: () => void;
   onDragEnd?: () => void;
   onMouseOver?: () => void;
+  mousePosition: {
+    x: number;
+    y: number;
+  };
 };
 
 type CardState = {};
@@ -30,19 +34,35 @@ class CardDisplay extends React.Component<CardDisplayProps, CardState> {
       onDragStart: () => {
         this.props.onDragStart?.();
         this.ref.current?.classList.add("dragging");
-
-        gsap.to(this.ref.current, {
-          opacity: 0,
-          duration: 0.25,
-        });
       },
       onDragEnd: () => {
         this.props.onDragEnd?.();
         this.ref.current?.classList.remove("dragging");
 
+        this.ref.current!.style.pointerEvents = "all";
         gsap.to(this.ref.current, {
-          opacity: 1,
+          x: 0,
+          y: 0,
           duration: 0.25,
+        });
+      },
+      onDrag: (x) => {
+        this.ref.current!.style.pointerEvents = "none";
+        const deltaX = x.deltaX;
+        const deltaY = x.deltaY;
+
+        //@ts-expect-error
+        const newX = gsap.getProperty(this.ref.current, "x") + deltaX;
+
+        //@ts-expect-error
+        const newY = gsap.getProperty(this.ref.current, "y") + deltaY;
+
+        console.log(this.props);
+
+        gsap.to(this.ref.current, {
+          x: newX + (this.props.mousePosition!.x - x.startX!),
+          y: newY + (this.props.mousePosition!.y - x.startY!),
+          duration: 0,
         });
       },
     });

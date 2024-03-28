@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "./CardHolder.scss";
 import CardDisplay from "../CardDisplay/CardDisplay";
 import Card from "../Card";
@@ -6,9 +6,17 @@ import Card from "../Card";
 type CardHolderProps = {
   cards: Card[];
   onReorder: (from: number, to: number) => void;
+  mousePosition: {
+    x: number;
+    y: number;
+  };
 };
 
-export default function CardHolder({ cards, onReorder }: CardHolderProps) {
+export default function CardHolder({
+  cards,
+  onReorder,
+  mousePosition,
+}: CardHolderProps) {
   const [draggingCardId, SetdraggingCardId] = useState<number>(-1);
 
   return (
@@ -17,20 +25,15 @@ export default function CardHolder({ cards, onReorder }: CardHolderProps) {
         <CardDisplay
           id={`card-${x.id}`}
           key={`card-${x.id}`}
-          onDragStart={() => {
-            SetdraggingCardId(i);
-          }}
-          onDragEnd={() => {
-            SetdraggingCardId(-1);
-          }}
+          onDragStart={() => SetdraggingCardId(i)}
+          onDragEnd={() => SetdraggingCardId(-1)}
           onMouseOver={() => {
-            if (draggingCardId === -1) return;
-
-            if (draggingCardId === i) return;
+            if (draggingCardId === -1 || draggingCardId === i) return;
 
             onReorder(draggingCardId, i);
             SetdraggingCardId(i);
           }}
+          mousePosition={mousePosition}
         >
           {x.text}
         </CardDisplay>
