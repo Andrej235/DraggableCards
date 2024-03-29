@@ -14,16 +14,11 @@ export type CardsProps = {
 type CardContainerProps = {
   cards: CardsProps;
   onReorder: (cards: CardsProps) => void; //? Callback function should update props in the parent (specifically cards)
-  mousePosition: {
-    x: number;
-    y: number;
-  };
 };
 
 export default function CardContainer({
   cards: { items, state, changedIds },
   onReorder,
-  mousePosition,
 }: CardContainerProps) {
   useGSAP(
     () => {
@@ -91,7 +86,6 @@ export default function CardContainer({
     <CardHolder
       cards={items}
       onReorder={reorder}
-      mousePosition={mousePosition}
     />
   );
 }

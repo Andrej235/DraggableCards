@@ -3,14 +3,6 @@ import CardContainer, { CardsProps } from "./Components/CardContainer";
 import Card from "./Components/Card";
 
 function App() {
-  const [mousePosition, setMousePosition] = useState<{
-    x: number;
-    y: number;
-  }>({
-    x: 0,
-    y: 0,
-  });
-
   const [cards, setCards] = useState<CardsProps>({
     items: [
       Card.create("Lorem ipsum dolor sit amet"),
@@ -24,16 +16,10 @@ function App() {
   });
 
   return (
-    <div
-      id="app"
-      onMouseMove={(x) => setMousePosition({ x: x.pageX, y: x.pageY })}
-    >
-      <CardContainer
-        cards={cards}
-        onReorder={setCards}
-        mousePosition={mousePosition}
-      />
-    </div>
+    <CardContainer
+      cards={cards}
+      onReorder={setCards}
+    />
   );
 }
 
