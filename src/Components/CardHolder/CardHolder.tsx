@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import "./CardHolder.scss";
 import CardDisplay from "../CardDisplay/CardDisplay";
 import Card from "../Card";
@@ -24,18 +24,11 @@ export default function CardHolder({ cards, onReorder }: CardHolderProps) {
     y: 0,
   });
 
-  const [movableCardAbsolutePosition, setMovableCardAbsolutePosition] =
-    useState<{
-      x: number;
-      y: number;
-    }>({
-      x: 0,
-      y: 0,
-    });
-
   const [cardDisplayRef, setCardDisplayRef] = useState<HTMLDivElement | null>(
     null
   );
+
+  const [isDraggingAvailable, setIsDraggingAvailable] = useState<boolean>(true);
 
   const { contextSafe } = useGSAP();
 
@@ -49,27 +42,44 @@ export default function CardHolder({ cards, onReorder }: CardHolderProps) {
     });
   });
 
-  const clearTranslationPosition = contextSafe(() => {
-    if (!movableCardRef.current) return;
+  const clearTranslationPosition = useCallback(
+    (x: { x: number; y: number }) =>
+      contextSafe(({ x, y }: { x: number; y: number }) => {
+        if (!movableCardRef.current) return;
 
-    gsap.to(movableCardRef.current, {
-      x: 0,
-      y: 0,
-      left: movableCardAbsolutePosition.x,
-      top: movableCardAbsolutePosition.y,
-      duration: 0.35,
-      onComplete: () => {
-        movableCardRef.current!.style.opacity = "0";
-        cardDisplayRef?.classList.remove("dragging");
-      },
-    });
-  });
+        gsap.to(movableCardRef.current, {
+          x: 0,
+          y: 0,
+          left: x,
+          top: y,
+          duration: 0.25,
+          onComplete: () => {
+            movableCardRef.current!.style.opacity = "0";
+            cardDisplayRef?.classList.remove("dragging");
+            setIsDraggingAvailable(true);
+          },
+        });
+      })(x),
+    [contextSafe, cardDisplayRef]
+  );
+
+  const beginDragging = useCallback(
+    (x: { x: number; y: number }) =>
+      contextSafe(({ x, y }: { x: number; y: number }) => {
+        if (!movableCardRef.current) return;
+
+        setIsDraggingAvailable(false);
+        gsap.to(movableCardRef.current, {
+          left: x,
+          top: y,
+          opacity: 1,
+          duration: 0,
+        });
+      })(x),
+    [contextSafe]
+  );
 
   useEffect(setTranslation, [movableCardTranslation, setTranslation]);
-  useEffect(clearTranslationPosition, [
-    movableCardAbsolutePosition,
-    clearTranslationPosition,
-  ]);
 
   return (
     <>
@@ -79,21 +89,18 @@ export default function CardHolder({ cards, onReorder }: CardHolderProps) {
             id={`card-${x.id}`}
             key={`card-${x.id}`}
             onDragStart={(rect, cardDisplay) => {
+              if (!isDraggingAvailable) return;
+
               SetdraggingCardId(i);
               setMovableCardContent(x.text);
 
-              if (movableCardRef.current) {
-                movableCardRef.current.style.left = `${rect.left}px`;
-                movableCardRef.current.style.top = `${rect.top}px`;
-                movableCardRef.current.style.opacity = "1";
-              }
-
+              beginDragging({ x: rect.left, y: rect.top });
               setCardDisplayRef(cardDisplay);
               cardDisplay.classList.add("dragging");
             }}
-            onDragEnd={(rect, cardDisplayRef) => {
+            onDragEnd={(rect) => {
               SetdraggingCardId(-1);
-              setMovableCardAbsolutePosition({ x: rect.left, y: rect.top });
+              clearTranslationPosition({ x: rect.left, y: rect.top });
             }}
             onDrag={(xDelta, yDelta) => {
               setMovableCardTranslation({ x: xDelta, y: yDelta });
