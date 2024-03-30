@@ -1,6 +1,6 @@
 @use "../../ColorPalette.scss" as *;
 
-.card-container {
+.card-holder {
   width: 20svw;
   height: fit-content;
   background-color: $mixed-100;
@@ -37,4 +37,5 @@
 
   border-radius: 10px;
   pointer-events: none;
+  opacity: 0;
 }

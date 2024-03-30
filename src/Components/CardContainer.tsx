@@ -5,25 +5,26 @@ import Flip from "gsap/Flip";
 import Card from "./Card";
 gsap.registerPlugin(Flip);
 
-export type CardsProps = {
+export interface CardsProps {
   items: Card[];
   state: Flip.FlipState | null;
   changedIds: string[] | null;
-};
+}
 
-type CardContainerProps = {
+export interface CardContainerProps {
   cards: CardsProps;
-  onReorder: (cards: CardsProps) => void; //? Callback function should update props in the parent (specifically cards)
-};
+  onReorder: (cards: CardsProps) => void;
+  onRemoveCard: (updatedCards: Card[], removedCard: Card) => void;
+}
 
 export default function CardContainer({
   cards: { items, state, changedIds },
   onReorder,
+  onRemoveCard,
 }: CardContainerProps) {
   useGSAP(
     () => {
       if (!state || !changedIds) return;
-
       Flip.from(state, {
         targets: changedIds,
         ease: "power1.inOut",
@@ -37,7 +38,6 @@ export default function CardContainer({
 
   function reorder(from: number, to: number) {
     const newArray = reorderArray(items, from, to);
-
     onReorder({
       items: newArray.array,
       state: Flip.getState(newArray.changedIds),
@@ -57,7 +57,6 @@ export default function CardContainer({
     const changedIds: string[] = [];
 
     if (from < to) {
-      // Move elements from 'from' to 'to' in the original array
       newArray.push(...array.slice(0, from));
       newArray.push(...array.slice(from + 1, to + 1));
       newArray.push(array[from]);
@@ -67,7 +66,6 @@ export default function CardContainer({
         ...array.slice(from + 1, to + 1).map((x) => `#card-${x.id}`)
       );
     } else {
-      // Move elements from 'to' to 'from' in the original array
       newArray.push(...array.slice(0, to));
       newArray.push(array[from]);
       newArray.push(...array.slice(to, from));
@@ -86,6 +84,15 @@ export default function CardContainer({
     <CardHolder
       cards={items}
       onReorder={reorder}
+      onRemoveCard={(idToRemove) => {
+        const cardToRemove = items.find((x) => x.id === idToRemove);
+        if (!cardToRemove) return;
+        
+        onRemoveCard(
+          items.filter((x) => x.id !== idToRemove),
+          cardToRemove
+        );
+      }}
     />
   );
 }

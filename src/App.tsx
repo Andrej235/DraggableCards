@@ -1,24 +1,27 @@
-import { useState } from "react";
-import CardContainer, { CardsProps } from "./Components/CardContainer";
-import Card from "./Components/Card";
+import { useMemo } from "react";
+import CardContainer from "./Components/CardContainer";
+import UseCard from "./Hooks/UseCardsHook";
 
 function App() {
-  const [cards, setCards] = useState<CardsProps>({
-    items: [
-      Card.create("Lorem ipsum dolor sit amet"),
-      Card.create("Corrupti nisi dolore debitis veniam"),
-      Card.create("Voluptatibus adipisci a repudiandae maiores"),
-      Card.create("Architecto cum harum culpa doloremque"),
-      Card.create("Lorem ipsum dolor sit amet consectetur adipisicing elit"),
+  const cardsText = useMemo(
+    () => [
+      "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Nam, reiciendis!",
+      "Reprehenderit temporibus asperiores aspernatur dicta sunt explicabo, aut eligendi adipisci!",
+      "Cupiditate magni, ut saepe impedit alias unde eum quo eligendi?",
+      "Velit eligendi ea cumque obcaecati doloremque amet. Libero, excepturi eos!",
+      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Nihil veritatis rem temporibus dolore unde dolorem!",
     ],
-    changedIds: [],
-    state: null,
-  });
+    []
+  );
+  const { cards, setCards } = UseCard(cardsText);
 
   return (
     <CardContainer
       cards={cards}
       onReorder={setCards}
+      onRemoveCard={(cards) =>
+        setCards({ items: cards, changedIds: null, state: null })
+      }
     />
   );
 }

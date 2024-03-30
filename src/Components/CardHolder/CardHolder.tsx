@@ -1,28 +1,27 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import "./CardHolder.scss";
 import CardDisplay from "../CardDisplay/CardDisplay";
 import Card from "../Card";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import useHover from "../../Hooks/UseHoverHook";
 
 type CardHolderProps = {
   cards: Card[];
   onReorder: (from: number, to: number) => void;
+  onRemoveCard: (id: number) => void;
 };
 
-export default function CardHolder({ cards, onReorder }: CardHolderProps) {
-  const [draggingCardId, SetdraggingCardId] = useState<number>(-1);
+export default function CardHolder({
+  cards,
+  onReorder,
+  onRemoveCard,
+}: CardHolderProps) {
+  const [draggingCardIndex, SetdraggingCardId] = useState<number>(-1);
   const [movableCardContent, setMovableCardContent] = useState<string>("");
 
   const movableCardRef = useRef<HTMLDivElement>(null);
-
-  const [movableCardTranslation, setMovableCardTranslation] = useState<{
-    x: number;
-    y: number;
-  }>({
-    x: 0,
-    y: 0,
-  });
+  const cardHolderRef = useRef<HTMLDivElement>(null);
 
   const [cardDisplayRef, setCardDisplayRef] = useState<HTMLDivElement | null>(
     null
@@ -32,18 +31,34 @@ export default function CardHolder({ cards, onReorder }: CardHolderProps) {
 
   const { contextSafe } = useGSAP();
 
-  const setTranslation = contextSafe(() => {
-    if (!movableCardRef.current) return;
+  const isHoveringOver = useHover({ x: cardHolderRef.current });
 
-    gsap.to(movableCardRef.current, {
-      x: `+=${movableCardTranslation.x}`,
-      y: `+=${movableCardTranslation.y}`,
-      duration: 0,
-    });
-  });
-
-  const clearTranslationPosition = useCallback(
+  const setTranslation = useCallback(
     (x: { x: number; y: number }) =>
+      contextSafe(({ x, y }: { x: number; y: number }) => {
+        if (!movableCardRef.current) return;
+
+        gsap.to(movableCardRef.current, {
+          x: `+=${x}`,
+          y: `+=${y}`,
+          duration: 0,
+        });
+      })(x),
+    [contextSafe]
+  );
+
+  const endDragging = useCallback(
+    (x: { x: number; y: number }) => {
+      if (!isHoveringOver) {
+        console.log(cards);
+        
+        onRemoveCard(cards[draggingCardIndex].id);
+        movableCardRef.current!.style.opacity = "0";
+        cardDisplayRef?.classList.remove("dragging");
+        setIsDraggingAvailable(true);
+        return;
+      }
+
       contextSafe(({ x, y }: { x: number; y: number }) => {
         if (!movableCardRef.current) return;
 
@@ -59,8 +74,9 @@ export default function CardHolder({ cards, onReorder }: CardHolderProps) {
             setIsDraggingAvailable(true);
           },
         });
-      })(x),
-    [contextSafe, cardDisplayRef]
+      })(x);
+    },
+    [contextSafe, cardDisplayRef, draggingCardIndex, onRemoveCard, isHoveringOver]
   );
 
   const beginDragging = useCallback(
@@ -79,11 +95,9 @@ export default function CardHolder({ cards, onReorder }: CardHolderProps) {
     [contextSafe]
   );
 
-  useEffect(setTranslation, [movableCardTranslation, setTranslation]);
-
   return (
     <>
-      <div className="card-container">
+      <div className="card-holder" ref={cardHolderRef}>
         {cards.map((x, i) => (
           <CardDisplay
             id={`card-${x.id}`}
@@ -100,15 +114,15 @@ export default function CardHolder({ cards, onReorder }: CardHolderProps) {
             }}
             onDragEnd={(rect) => {
               SetdraggingCardId(-1);
-              clearTranslationPosition({ x: rect.left, y: rect.top });
+              endDragging({ x: rect.left, y: rect.top });
             }}
             onDrag={(xDelta, yDelta) => {
-              setMovableCardTranslation({ x: xDelta, y: yDelta });
+              setTranslation({ x: xDelta, y: yDelta });
             }}
             onMouseOver={() => {
-              if (draggingCardId === -1 || draggingCardId === i) return;
+              if (draggingCardIndex === -1 || draggingCardIndex === i) return;
 
-              onReorder(draggingCardId, i);
+              onReorder(draggingCardIndex, i);
               SetdraggingCardId(i);
             }}
           >
